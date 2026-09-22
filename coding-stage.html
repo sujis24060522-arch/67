@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>코딩무대</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/blockly@13.2.1/blockly_compressed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/blockly@13.2.1/blocks_compressed.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/blockly@13.2.1/msg/ko.js"></script>
+<style>
+:root{
+  --bar:#16203C;
+  --ink:#16203C;
+  --paper:#EEF3FF;
+  --card:#FFFFFF;
+  --grape:#5B3DF5;
+  --lime:#B9F227;
+  --coral:#FF5C72;
+  --sun:#FFC53D;
+  --line:#D7DFF5;
+  --muted:#6B7799;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0B1020; --card:#141B33; --line:#242E52; --muted:#8C97BE; --ink:#EAF0FF;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0B1020; --card:#141B33; --line:#242E52; --muted:#8C97BE; --ink:#EAF0FF;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overscroll-behavior:none}
+body{
+  font-family:'Noto Sans KR',system-ui,sans-serif;
+  background:var(--paper);color:var(--ink);
+}
+button{font-family:inherit;cursor:pointer;touch-action:manipulation;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--grape);outline-offset:2px}
+h1,h2,h3{font-family:'Jua',sans-serif;font-weight:400;margin:0}
+
+#appRoot{min-height:100dvh;display:flex;flex-direction:column}
+
+/* ---------- 헤더 ---------- */
+#siteHeader{background:var(--bar);color:#fff;flex:none}
+.nav-inner{
+  max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top));
+}
+.brand{font-family:'Jua',sans-serif;font-size:18px;white-space:nowrap}
+.nav-links{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.nav-links a{font-size:14px;font-weight:700;padding:8px 12px;border-radius:10px;color:rgba(255,255,255,.75)}
+.nav-links a.on{background:rgba(255,255,255,.14);color:#fff}
+.nav-user{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.8);white-space:nowrap}
+.tag-admin{font-size:10px;background:var(--sun);color:#5A3E00;padding:2px 6px;border-radius:999px;font-weight:800}
+.ghost-dark{background:rgba(255,255,255,.14);color:#fff;font-size:13px;font-weight:700;padding:7px 12px;border-radius:10px}
+.ghost-dark:active{transform:scale(.96)}
+
+#view{flex:1;min-height:0;display:flex;flex-direction:column}
+
+/* ---------- 레이아웃 ---------- */
+.page{max-width:1040px;width:100%;margin:0 auto;padding:28px 20px calc(40px + env(safe-area-inset-bottom));overflow-y:auto}
+.crumb{font-size:13px;color:var(--muted);letter-spacing:.02em;margin-bottom:6px}
+.title{font-size:clamp(24px,6vw,36px);line-height:1.25;margin:0 0 4px}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px}
+
+/* ---------- 카드/버튼 공통 ---------- */
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px}
+.btn{font-weight:700;font-size:14px;padding:11px 18px;border-radius:12px;background:var(--bar);color:#fff;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--grape)}
+.btn.go{background:var(--lime);color:#16203C}
+.btn.danger{background:var(--coral);color:#fff}
+.btn.line{background:transparent;border:2px solid var(--line);color:var(--ink)}
+.btn.block{width:100%}
+.btn.small{padding:9px 14px;font-size:13px}
+.btn:disabled{opacity:.45;pointer-events:none}
+
+/* ---------- 폼 ---------- */
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--muted)}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;
+  font-family:inherit;font-size:15px;background:var(--card);color:var(--ink);
+}
+.field textarea{resize:vertical;min-height:80px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--grape)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.alert{padding:12px 14px;border-radius:12px;font-size:14px;font-weight:600;margin-bottom:16px}
+.alert.err{background:#FFE6EA;color:#B3123A}
+.alert.ok{background:#EAFBD9;color:#3E7A00}
+
+/* ---------- 배지 ---------- */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--paper);color:var(--muted)}
+.badge.vip{background:#FFF6DE;color:#C98A00}
+
+/* ---------- 문제 목록 ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.filters button{font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;background:var(--card);border:2px solid var(--line);color:var(--muted)}
+.filters button.on{background:var(--bar);border-color:var(--bar);color:#fff}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+.arcadeBanner{
+  display:flex;align-items:center;gap:14px;padding:16px 18px;margin-bottom:20px;flex-wrap:wrap;
+  background:linear-gradient(100deg,#EFE8FF,#FFF3D9);border:2px solid var(--sun);border-radius:16px;color:#16203C;
+}
+.arcadeBanner .ic{font-size:30px;flex:none}
+.arcadeBanner b{display:block;font-size:15px}
+.arcadeBanner span{display:block;font-size:12px;color:#6B7799;margin-top:2px}
+.arcadeBanner .btn{margin-left:auto;flex:none}
+
+.plist{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.pcard{padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .12s ease,border-color .12s ease}
+.pcard:hover,.pcard:active{transform:translateY(-2px);border-color:var(--grape)}
+.pcard .top{display:flex;align-items:center;gap:8px}
+.pcard .emo{font-size:22px}
+.pcard h3{font-size:17px}
+.pcard p{font-size:13px;color:var(--muted);margin:0;line-height:1.5;flex:1}
+.pcard .meta{display:flex;gap:6px;flex-wrap:wrap}
+.solved-mark{margin-left:auto;font-size:12px;font-weight:800;color:#3E7A00}
+
+/* ---------- 관리자 ---------- */
+.grid2{display:grid;grid-template-columns:minmax(0,420px) 1fr;gap:24px;align-items:start}
+@media (max-width:820px){ .grid2{grid-template-columns:1fr} }
+.formCard{padding:22px}
+.listCard{padding:6px 0}
+.formCard h2,.listCard h2{font-size:18px;padding:14px 20px 4px}
+.goalBox{border:2px dashed var(--line);border-radius:12px;padding:12px;margin-top:4px}
+.arow{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.arow:last-child{border-bottom:none}
+.arow .info{flex:1;min-width:0}
+.arow .info b{display:block;font-size:14px}
+.arow .info span{font-size:12px;color:var(--muted)}
+.arow .acts{display:flex;gap:6px;flex:none}
+.iconbtn{font-size:12px;font-weight:700;padding:7px 10px;border-radius:9px;background:var(--paper)}
+.iconbtn.del{background:#FFE6EA;color:#B3123A}
+
+/* ---------- 인증 화면 ---------- */
+.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{width:100%;max-width:380px;padding:32px 28px;text-align:center}
+.auth-logo{font-family:'Jua',sans-serif;font-size:26px;margin-bottom:2px}
+.auth-tabs{display:flex;background:var(--paper);border-radius:12px;padding:4px;margin-bottom:20px}
+.auth-tabs button{flex:1;padding:9px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted)}
+.auth-tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(22,32,60,.12)}
+.hint{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6}
+
+/* ---------- 문제 풀이 ---------- */
+.solveShell{flex:1;min-height:0;display:flex;flex-direction:column}
+.pbar{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--card);border-bottom:2px solid var(--line);flex:none;flex-wrap:wrap;
+}
+.pbar h2{font-size:16px;flex:1;min-width:120px}
+.result{
+  position:fixed;left:50%;bottom:18px;transform:translate(-50%,140%);
+  transition:transform .25s ease;z-index:20;
+  padding:14px 22px;border-radius:16px;font-weight:800;font-size:15px;
+  box-shadow:0 10px 24px rgba(22,32,60,.25);display:flex;align-items:center;gap:10px;max-width:90vw;
+}
+.result.show{transform:translate(-50%,0)}
+.result.ok{background:var(--lime);color:#16203C}
+.result.no{background:var(--coral);color:#fff}
+.result.info{background:var(--bar);color:#fff}
+.result-link{color:inherit;text-decoration:underline;font-weight:800;white-space:nowrap}
+.desc-toggle{font-size:13px;font-weight:700;padding:8px 12px;border-radius:10px;background:var(--paper)}
+.descPanel{padding:14px 16px;background:#FFF9E9;border-bottom:2px solid var(--line);font-size:14px;line-height:1.6;color:#16203C}
+.descPanel .goalline{margin-top:6px;font-weight:700;color:#7A5B00}
+.work{flex:1;min-height:0;display:flex;flex-direction:column}
+.stage-wrap{flex:none;background:#0E1630;position:relative}
+#stage{display:block;width:100%;height:auto;aspect-ratio:16/9}
+#bly{flex:1;min-height:0}
+@media (min-width:900px){
+  .work{flex-direction:row-reverse}
+  .stage-wrap{flex:none;width:42%;max-width:560px;display:flex;align-items:center;justify-content:center;padding:16px}
+  #stage{border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+}
+
+/* ---------- 아케이드 ---------- */
+.locked{max-width:520px;margin:40px auto;padding:32px 24px;text-align:center}
+.locked .ic{font-size:44px;margin-bottom:8px}
+.glist{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));max-width:900px;margin:0 auto}
+.gcard{padding:20px;display:flex;flex-direction:column;gap:10px;text-align:left;transition:transform .12s ease,border-color .12s ease}
+.gcard:active{transform:scale(.98);border-color:var(--grape)}
+.gcard .ic{font-size:34px}
+.gcard h3{font-size:17px}
+.gcard p{font-size:13px;color:var(--muted);margin:0;line-height:1.5}
+.gcard .best{font-size:12px;font-weight:700;color:#7A5B00;background:#FFF6DE;padding:4px 9px;border-radius:999px;align-self:flex-start}
+.gwrap{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0E1630;position:relative;padding:16px}
+.gtopbar{position:absolute;top:10px;left:10px;z-index:5}
+canvas.stage-cv{display:block;width:100%;max-width:820px;height:auto;aspect-ratio:16/7;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.4);touch-action:none}
+.hud{
+  position:absolute;top:26px;left:50%;transform:translateX(-50%);width:100%;max-width:820px;
+  display:flex;justify-content:space-between;padding:0 22px;pointer-events:none;color:#fff;font-weight:800;font-size:15px;
+}
+.hud span b{font-family:'Jua',sans-serif;font-size:19px;margin-left:4px}
+.overlay{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:rgba(14,22,48,.72);color:#fff;text-align:center;padding:20px;border-radius:16px;
+}
+.overlay h2{font-size:24px}
+.overlay p{margin:0;color:#C6D2F5;font-size:14px;max-width:320px;line-height:1.6}
+</style>
+</head>
+<body>
+<div id="appRoot">
+  <header id="siteHeader"></header>
+  <main id="view"></main>
+</div>
+
+<script>
+/* =========================================================
+   0. 공용 데이터
+   ========================================================= */
+const CATS = {
+  game: { emo:'🎮', name:'게임 코딩',        desc:'캐릭터를 움직이고 점수를 만들어' },
+  math: { emo:'📚', name:'공부 / 수학',       desc:'좌표와 계산을 눈으로 확인해' },
+  move: { emo:'🏃', name:'운동 / 인터랙티브', desc:'트랙을 달리고 기록을 재봐' }
+};
+const LEVELS = {
+  1:{ name:'기초 블록',   desc:'움직임과 말하기' },
+  2:{ name:'조건 / 반복', desc:'반복과 만약~라면' },
+  3:{ name:'연산 / 변수', desc:'사칙연산과 무작위 수' },
+  4:{ name:'고급 응용',   desc:'조건 반복과 좌표값' },
+  5:{ name:'심화 개발',   desc:'함수와 문자 합치기' },
+  9:{ name:'VIP 자유 모드', desc:'모든 블록을 제한 없이' }
+};
+const levelLabel = n => n === 9 ? '👑 VIP' : n + '단계';
+
+const K_USERS = 'cs_users', K_SESSION = 'cs_session', K_PROBLEMS = 'cs_problems',
+      K_SOLVED = 'cs_solved', K_HIGHSCORE = 'cs_highscore';
+
+/* 데모용 단순 인코딩. 실제 서비스에서는 반드시 서버 측 해시(bcrypt 등)를 사용해야 함. */
+function obf(s){ return btoa(unescape(encodeURIComponent('cs::' + s))); }
+
+function getUsers(){ try { return JSON.parse(localStorage.getItem(K_USERS)) || {}; } catch(e){ return {}; } }
+function saveUsers(u){ try { localStorage.setItem(K_USERS, JSON.stringify(u)); } catch(e){} }
+function getProblems(){ try { return JSON.parse(localStorage.getItem(K_PROBLEMS)) || []; } catch(e){ return []; } }
+function saveProblems(p){ try { localStorage.setItem(K_PROBLEMS, JSON.stringify(p)); } catch(e){} }
+function getSession(){ try { return JSON.parse(sessionStorage.getItem(K_SESSION)); } catch(e){ return null; } }
+function setSession(s){ try { sessionStorage.setItem(K_SESSION, JSON.stringify(s)); } catch(e){} }
+function clearSession(){ try { sessionStorage.removeItem(K_SESSION); } catch(e){} }
+
+function getSolvedSet(username){
+  try { const all = JSON.parse(localStorage.getItem(K_SOLVED)) || {}; return new Set(all[username] || []); }
+  catch(e){ return new Set(); }
+}
+function markSolved(username, problemId){
+  try {
+    const all = JSON.parse(localStorage.getItem(K_SOLVED) || '{}');
+    const set = new Set(all[username] || []);
+    set.add(problemId);
+    all[username] = [...set];
+    localStorage.setItem(K_SOLVED, JSON.stringify(all));
+  } catch(e){}
+}
+function getHighScore(username, gameId){
+  try { const all = JSON.parse(localStorage.getItem(K_HIGHSCORE)) || {}; return (all[username] && all[username][gameId]) || 0; }
+  catch(e){ return 0; }
+}
+function setHighScore(username, gameId, score){
+  try {
+    const all = JSON.parse(localStorage.getItem(K_HIGHSCORE) || '{}');
+    if (!all[username]) all[username] = {};
+    if (!all[username][gameId] || score > all[username][gameId]) {
+      all[username][gameId] = score;
+      localStorage.setItem(K_HIGHSCORE, JSON.stringify(all));
+      return true;
+    }
+    return false;
+  } catch(e){ return false; }
+}
+
+function seed(){
+  const users = getUsers();
+  if (!users.admin) { users.admin = { pass: obf('admin1234'), role:'admin', joined: Date.now() }; saveUsers(users); }
+  if (!localStorage.getItem(K_PROBLEMS)) {
+    const now = Date.now();
+    saveProblems([
+      { id:'p1', title:'앞으로 100 만큼!', category:'game', level:1,
+        desc:'움직임 블록으로 캐릭터를 오른쪽으로 이동시켜서 깃발 지점에 세워봐.',
+        goal:{ type:'position', x:120, y:0, tol:25 }, createdBy:'admin', createdAt: now },
+      { id:'p2', title:'좌표 위에 정확히 서보기', category:'math', level:1,
+        desc:'x = -100, y = 80 위치로 정확히 이동해봐. 좌표 격자를 참고해.',
+        goal:{ type:'position', x:-100, y:80, tol:20 }, createdBy:'admin', createdAt: now },
+      { id:'p3', title:'출발 신호 외치기', category:'move', level:2,
+        desc:'말하기 블록을 사용해서 "출발!" 이라고 말해봐.',
+        goal:{ type:'say', text:'출발!' }, createdBy:'admin', createdAt: now }
+    ]);
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* =========================================================
+   1. 라우터
+   ========================================================= */
+let teardownFn = null;
+function setTeardown(fn){ teardownFn = fn; }
+function runTeardown(){ if (teardownFn) { try { teardownFn(); } catch(e){} teardownFn = null; } }
+
+function requireAuth(adminOnly){
+  const s = getSession();
+  if (!s) { location.hash = '#/auth'; return null; }
+  const users = getUsers();
+  if (!users[s.username]) { clearSession(); location.hash = '#/auth'; return null; }
+  if (adminOnly && s.role !== 'admin') { location.hash = '#/problems'; return null; }
+  return s;
+}
+
+function renderHeader(active){
+  const s = getSession();
+  const el = document.getElementById('siteHeader');
+  if (!s) { el.innerHTML = ''; return; }
+  el.innerHTML =
+    '<div class="nav-inner">' +
+      '<a class="brand" href="#/problems">🧩 코딩무대</a>' +
+      '<nav class="nav-links">' +
+        '<a href="#/problems" class="' + (active === 'problems' ? 'on' : '') + '">문제 목록</a>' +
+        '<a href="#/arcade" class="' + (active === 'arcade' ? 'on' : '') + '">🎮 미니게임</a>' +
+        (s.role === 'admin' ? '<a href="#/admin" class="' + (active === 'admin' ? 'on' : '') + '">관리자</a>' : '') +
+      '</nav>' +
+      '<div class="nav-user">' +
+        '<span>' + escapeHtml(s.username) + (s.role === 'admin' ? ' <b class="tag-admin">관리자</b>' : '') + '</span>' +
+        '<button id="btnLogout" class="ghost-dark">로그아웃</button>' +
+      '</div>' +
+    '</div>';
+  document.getElementById('btnLogout').onclick = () => { clearSession(); location.hash = '#/auth'; };
+}
+
+function parseHash(){ return location.hash.replace(/^#\/?/, '').split('/').filter(Boolean); }
+
+function route(){
+  runTeardown();
+  const parts = parseHash();
+  const seg = parts[0] || '';
+
+  if (seg === '') { location.hash = getSession() ? '#/problems' : '#/auth'; return; }
+  if (seg === 'auth' && getSession()) { location.hash = '#/problems'; return; }
+
+  renderHeader(seg);
+  const view = document.getElementById('view');
+  view.innerHTML = '';
+
+  switch (seg) {
+    case 'auth':     renderAuthView(view); break;
+    case 'problems': renderProblemsView(view); break;
+    case 'admin':    renderAdminView(view); break;
+    case 'solve':    renderSolveView(view, decodeURIComponent(parts[1] || '')); break;
+    case 'arcade':   renderArcadeView(view); break;
+    default:         location.hash = '#/problems';
+  }
+}
+addEventListener('hashchange', route);
+
+/* =========================================================
+   2. 로그인 / 회원가입
+   ========================================================= */
+function renderAuthView(view){
+  view.innerHTML =
+    '<div class="auth-wrap">' +
+      '<div class="auth-card card">' +
+        '<div class="auth-logo">🧩 코딩무대</div>' +
+        '<p class="sub" style="margin-bottom:20px">문제를 보고, 블록으로 풀어봐</p>' +
+        '<div class="auth-tabs"><button id="tabLogin" class="on">로그인</button><button id="tabSignup">회원가입</button></div>' +
+        '<div id="alertBox"></div>' +
+        '<form id="formLogin">' +
+          '<div class="field" style="text-align:left"><label>아이디</label><input id="liUser" autocomplete="username" required></div>' +
+          '<div class="field" style="text-align:left"><label>비밀번호</label><input id="liPass" type="password" autocomplete="current-password" required></div>' +
+          '<button class="btn primary block" type="submit">로그인</button>' +
+        '</form>' +
+        '<form id="formSignup" hidden>' +
+          '<div class="field" style="text-align:left"><label>아이디</label><input id="suUser" autocomplete="username" required minlength="3"></div>' +
+          '<div class="field" style="text-align:left"><label>비밀번호</label><input id="suPass" type="password" autocomplete="new-password" required minlength="4"></div>' +
+          '<div class="field" style="text-align:left"><label>비밀번호 확인</label><input id="suPass2" type="password" autocomplete="new-password" required minlength="4"></div>' +
+          '<button class="btn go block" type="submit">가입하고 시작하기</button>' +
+        '</form>' +
+        '<p class="hint">관리자 데모 계정 · 아이디 <b>admin</b> / 비밀번호 <b>admin1234</b></p>' +
+      '</div>' +
+    '</div>';
+
+  const tabLogin = document.getElementById('tabLogin'), tabSignup = document.getElementById('tabSignup');
+  const formLogin = document.getElementById('formLogin'), formSignup = document.getElementById('formSignup');
+  const alertBox = document.getElementById('alertBox');
+
+  function showTab(which){
+    const login = which === 'login';
+    tabLogin.classList.toggle('on', login); tabSignup.classList.toggle('on', !login);
+    formLogin.hidden = !login; formSignup.hidden = login; alertBox.innerHTML = '';
+  }
+  tabLogin.onclick = () => showTab('login');
+  tabSignup.onclick = () => showTab('signup');
+  function alert_(msg, type){ alertBox.innerHTML = '<div class="alert ' + type + '">' + msg + '</div>'; }
+
+  formLogin.onsubmit = (e) => {
+    e.preventDefault();
+    const username = document.getElementById('liUser').value.trim();
+    const pass = document.getElementById('liPass').value;
+    const u = getUsers()[username];
+    if (!u || u.pass !== obf(pass)) { alert_('아이디 또는 비밀번호가 올바르지 않아.', 'err'); return; }
+    setSession({ username, role: u.role });
+    location.hash = '#/problems';
+  };
+
+  formSignup.onsubmit = (e) => {
+    e.preventDefault();
+    const username = document.getElementById('suUser').value.trim();
+    const pass = document.getElementById('suPass').value, pass2 = document.getElementById('suPass2').value;
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) { alert_('아이디는 영문/숫자/밑줄 3~20자로 입력해줘.', 'err'); return; }
+    if (pass !== pass2) { alert_('비밀번호가 서로 달라.', 'err'); return; }
+    const users = getUsers();
+    if (users[username]) { alert_('이미 사용 중인 아이디야.', 'err'); return; }
+    users[username] = { pass: obf(pass), role: 'user', joined: Date.now() };
+    saveUsers(users);
+    setSession({ username, role: 'user' });
+    location.hash = '#/problems';
+  };
+}
+
+/* =========================================================
+   3. 문제 목록
+   ========================================================= */
+function renderProblemsView(view){
+  const session = requireAuth(false);
+  if (!session) return;
+
+  view.innerHTML =
+    '<div class="page">' +
+      '<p class="crumb">문제 은행</p>' +
+      '<h1 class="title">어떤 문제를 풀어볼까?</h1>' +
+      '<p class="sub">카테고리를 골라 필터링하고, 카드를 눌러 바로 풀어봐.</p>' +
+      '<div class="arcadeBanner" id="arcadeBanner"></div>' +
+      '<div class="filters" id="filters"></div>' +
+      '<div class="plist" id="plist"></div>' +
+      '<div class="empty" id="empty" hidden>아직 등록된 문제가 없어. 관리자에게 문제 추가를 요청해봐.</div>' +
+    '</div>';
+
+  let filter = 'all';
+  const filters = document.getElementById('filters');
+  const plist = document.getElementById('plist');
+  const empty = document.getElementById('empty');
+
+  function buildFilters(){
+    const chips = [{k:'all', label:'전체'}, ...Object.entries(CATS).map(([k,c]) => ({k, label:c.emo + ' ' + c.name}))];
+    filters.innerHTML = '';
+    chips.forEach(c => {
+      const b = document.createElement('button');
+      b.textContent = c.label; b.className = filter === c.k ? 'on' : '';
+      b.onclick = () => { filter = c.k; render(); };
+      filters.appendChild(b);
+    });
+  }
+
+  function renderArcadeBanner(solvedCount){
+    const el = document.getElementById('arcadeBanner');
+    if (solvedCount < 1) {
+      el.innerHTML = '<span class="ic">🔒</span><span><b>미니게임 3종이 잠겨 있어</b><span>문제를 1개 이상 풀면 미니게임을 즐길 수 있어.</span></span>';
+    } else {
+      el.innerHTML =
+        '<span class="ic">🎮</span><span><b>미니게임 3종 이용 가능!</b><span>' + solvedCount + '문제 해결 · 게임이 조금씩 더 빨라져</span></span>' +
+        '<a href="#/arcade" class="btn go">게임하러 가기</a>';
+    }
+  }
+
+  function render(){
+    buildFilters();
+    const solved = getSolvedSet(session.username);
+    renderArcadeBanner(solved.size);
+    const problems = getProblems().filter(p => filter === 'all' || p.category === filter).sort((a,b) => a.level - b.level);
+    plist.innerHTML = '';
+    empty.hidden = problems.length > 0;
+    problems.forEach(p => {
+      const c = CATS[p.category] || CATS.game;
+      const lv = LEVELS[p.level] || LEVELS[1];
+      const a = document.createElement('a');
+      a.href = '#/solve/' + encodeURIComponent(p.id);
+      a.className = 'pcard card';
+      a.innerHTML =
+        '<div class="top"><span class="emo">' + c.emo + '</span><h3>' + escapeHtml(p.title) + '</h3>' +
+        (solved.has(p.id) ? '<span class="solved-mark">✔ 완료</span>' : '') + '</div>' +
+        '<p>' + escapeHtml(p.desc) + '</p>' +
+        '<div class="meta">' +
+          '<span class="badge' + (p.level === 9 ? ' vip' : '') + '">' + levelLabel(p.level) + ' · ' + lv.name + '</span>' +
+          '<span class="badge">' + c.name + '</span>' +
+        '</div>';
+      plist.appendChild(a);
+    });
+  }
+  render();
+}
+
+/* =========================================================
+   4. 관리자
+   ========================================================= */
+function renderAdminView(view){
+  const session = requireAuth(true);
+  if (!session) return;
+
+  view.innerHTML =
+    '<div class="page">' +
+      '<p class="crumb">관리자</p>' +
+      '<h1 class="title">문제 만들기</h1>' +
+      '<p class="sub">카테고리, 난이도, 채점 목표를 정해서 새 문제를 등록해.</p>' +
+      '<div class="grid2">' +
+        '<section class="card formCard">' +
+          '<div id="alertBox"></div>' +
+          '<form id="pForm">' +
+            '<input type="hidden" id="pId">' +
+            '<div class="field"><label>문제 제목</label><input id="pTitle" required maxlength="40"></div>' +
+            '<div class="field"><label>문제 설명</label><textarea id="pDesc" required maxlength="300"></textarea></div>' +
+            '<div class="row2">' +
+              '<div class="field"><label>카테고리</label><select id="pCat"></select></div>' +
+              '<div class="field"><label>난이도</label><select id="pLevel"></select></div>' +
+            '</div>' +
+            '<div class="field"><label>채점 방식</label>' +
+              '<select id="pGoalType">' +
+                '<option value="position">특정 좌표에 도착하기</option>' +
+                '<option value="say">특정 문장 말하기</option>' +
+                '<option value="free">자유 연습 (자동 채점 없음)</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="goalBox" id="goalPosition">' +
+              '<div class="row2"><div class="field"><label>목표 x</label><input id="gX" type="number" value="0"></div><div class="field"><label>목표 y</label><input id="gY" type="number" value="0"></div></div>' +
+              '<div class="field"><label>허용 오차(px)</label><input id="gTol" type="number" value="25" min="5"></div>' +
+            '</div>' +
+            '<div class="goalBox" id="goalSay" hidden><div class="field"><label>목표 문장</label><input id="gSay" maxlength="30" placeholder="예: 출발!"></div></div>' +
+            '<button class="btn primary block" type="submit" id="pSubmit">문제 등록하기</button>' +
+            '<button class="btn line block" type="button" id="pCancel" style="margin-top:8px" hidden>수정 취소</button>' +
+          '</form>' +
+        '</section>' +
+        '<section class="card listCard"><h2>등록된 문제 (<span id="countTxt">0</span>)</h2><div id="rows"></div></section>' +
+      '</div>' +
+    '</div>';
+
+  const pCat = document.getElementById('pCat'), pLevel = document.getElementById('pLevel');
+  Object.entries(CATS).forEach(([k,c]) => { const o=document.createElement('option'); o.value=k; o.textContent=c.emo+' '+c.name; pCat.appendChild(o); });
+  Object.keys(LEVELS).map(Number).sort((a,b)=>a-b).forEach(n => { const o=document.createElement('option'); o.value=n; o.textContent=levelLabel(n)+' · '+LEVELS[n].name; pLevel.appendChild(o); });
+
+  const pGoalType = document.getElementById('pGoalType'), goalPosition = document.getElementById('goalPosition'), goalSay = document.getElementById('goalSay');
+  pGoalType.onchange = () => { goalPosition.hidden = pGoalType.value !== 'position'; goalSay.hidden = pGoalType.value !== 'say'; };
+
+  const form = document.getElementById('pForm'), alertBox = document.getElementById('alertBox');
+  const pCancel = document.getElementById('pCancel'), pSubmit = document.getElementById('pSubmit');
+  function alert_(msg, type){ alertBox.innerHTML = '<div class="alert ' + type + '">' + msg + '</div>'; }
+
+  function resetForm(){
+    form.reset(); document.getElementById('pId').value = '';
+    pGoalType.value = 'position'; goalPosition.hidden = false; goalSay.hidden = true;
+    pSubmit.textContent = '문제 등록하기'; pCancel.hidden = true; alertBox.innerHTML = '';
+  }
+  function fillForm(p){
+    document.getElementById('pId').value = p.id;
+    document.getElementById('pTitle').value = p.title;
+    document.getElementById('pDesc').value = p.desc;
+    pCat.value = p.category; pLevel.value = p.level; pGoalType.value = p.goal.type;
+    goalPosition.hidden = p.goal.type !== 'position'; goalSay.hidden = p.goal.type !== 'say';
+    if (p.goal.type === 'position') { document.getElementById('gX').value=p.goal.x; document.getElementById('gY').value=p.goal.y; document.getElementById('gTol').value=p.goal.tol; }
+    else if (p.goal.type === 'say') document.getElementById('gSay').value = p.goal.text;
+    pSubmit.textContent = '수정 저장하기'; pCancel.hidden = false;
+    view.scrollTo({top:0, behavior:'smooth'});
+  }
+  pCancel.onclick = resetForm;
+
+  function renderList(){
+    const problems = getProblems().sort((a,b) => b.createdAt - a.createdAt);
+    document.getElementById('countTxt').textContent = problems.length;
+    const rows = document.getElementById('rows'); rows.innerHTML = '';
+    if (!problems.length) { rows.innerHTML = '<p style="padding:16px 20px;color:var(--muted);font-size:14px">아직 등록된 문제가 없어.</p>'; return; }
+    problems.forEach(p => {
+      const c = CATS[p.category] || CATS.game;
+      const row = document.createElement('div'); row.className = 'arow';
+      row.innerHTML =
+        '<div class="info"><b>' + c.emo + ' ' + escapeHtml(p.title) + '</b><span>' + levelLabel(p.level) + ' · ' + c.name + '</span></div>' +
+        '<div class="acts"><button class="iconbtn" data-edit="' + p.id + '">수정</button><button class="iconbtn del" data-del="' + p.id + '">삭제</button></div>';
+      rows.appendChild(row);
+    });
+    rows.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => { const p = getProblems().find(x => x.id === b.dataset.edit); if (p) fillForm(p); });
+    rows.querySelectorAll('[data-del]').forEach(b => b.onclick = () => {
+      if (!confirm('이 문제를 삭제할까?')) return;
+      saveProblems(getProblems().filter(x => x.id !== b.dataset.del));
+      renderList();
+    });
+  }
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    const title = document.getElementById('pTitle').value.trim();
+    const desc = document.getElementById('pDesc').value.trim();
+    if (!title || !desc) { alert_('제목과 설명을 모두 입력해줘.', 'err'); return; }
+    let goal;
+    if (pGoalType.value === 'position') {
+      goal = { type:'position', x:Number(document.getElementById('gX').value)||0, y:Number(document.getElementById('gY').value)||0,
+                tol: Math.max(5, Number(document.getElementById('gTol').value) || 25) };
+    } else if (pGoalType.value === 'say') {
+      const t = document.getElementById('gSay').value.trim();
+      if (!t) { alert_('목표 문장을 입력해줘.', 'err'); return; }
+      goal = { type:'say', text:t };
+    } else goal = { type:'free' };
+
+    const id = document.getElementById('pId').value;
+    const problems = getProblems();
+    if (id) {
+      const idx = problems.findIndex(p => p.id === id);
+      if (idx > -1) problems[idx] = { ...problems[idx], title, desc, category: pCat.value, level:Number(pLevel.value), goal };
+    } else {
+      problems.push({ id:'p_'+Date.now().toString(36), title, desc, category:pCat.value, level:Number(pLevel.value), goal,
+        createdBy: session.username, createdAt: Date.now() });
+    }
+    saveProblems(problems);
+    alert_(id ? '수정했어.' : '새 문제를 등록했어.', 'ok');
+    resetForm(); renderList();
+  };
+
+  resetForm(); renderList();
+}
+
+/* =========================================================
+   5. 문제 풀이 (블록코딩)
+   ========================================================= */
+function renderSolveView(view, id){
+  const session = requireAuth(false);
+  if (!session) return;
+
+  const problem = getProblems().find(p => p.id === id);
+  if (!problem) {
+    view.innerHTML = '<div class="page"><p>존재하지 않는 문제야. <a href="#/problems" style="color:#5B3DF5;font-weight:700">목록으로 돌아가기</a></p></div>';
+    return;
+  }
+  if (typeof Blockly === 'undefined') {
+    view.innerHTML = '<div class="page">Blockly 라이브러리를 불러오지 못했어. 네트워크(CDN) 상태를 확인해줘.</div>';
+    return;
+  }
+
+  const catInfo = CATS[problem.category] || CATS.game;
+  const goalText = (() => {
+    if (problem.goal.type === 'position') return '🎯 목표: x=' + problem.goal.x + ', y=' + problem.goal.y + ' 근처(오차 ' + problem.goal.tol + ') 도착';
+    if (problem.goal.type === 'say') return '🎯 목표: "' + problem.goal.text + '" 라고 말하기';
+    return '🎯 자유 연습 문제야. 자동 채점 없이 마음껏 연습해봐.';
+  })();
+
+  view.innerHTML =
+    '<div class="solveShell">' +
+      '<div class="pbar">' +
+        '<a href="#/problems" class="btn line small">← 목록</a>' +
+        '<h2>' + catInfo.emo + ' ' + escapeHtml(problem.title) + '</h2>' +
+        '<span class="badge">' + catInfo.name + '</span>' +
+        '<span class="badge' + (problem.level===9?' vip':'') + '">' + levelLabel(problem.level) + ' · ' + (LEVELS[problem.level]||{}).name + '</span>' +
+        '<button class="desc-toggle" id="btnDesc">설명 보기</button>' +
+        '<button class="btn go small" id="btnRun">▶ 실행</button>' +
+        '<button class="btn danger small" id="btnStop" hidden>■ 정지</button>' +
+        '<button class="btn line small" id="btnReset">↺ 리셋</button>' +
+      '</div>' +
+      '<div class="descPanel" id="descPanel">' +
+        '<div>' + escapeHtml(problem.desc) + '</div>' +
+        '<div class="goalline">' + escapeHtml(goalText) + '</div>' +
+      '</div>' +
+      '<div class="work"><div class="stage-wrap"><canvas id="stage" width="960" height="540"></canvas></div><div id="bly"></div></div>' +
+    '</div>' +
+    '<div class="result" id="resultBox"></div>';
+
+  document.getElementById('btnDesc').onclick = () => {
+    const dp = document.getElementById('descPanel'); dp.hidden = !dp.hidden;
+  };
+
+  /* ---- 블록 정의 ---- */
+  const C = { start:'#4AC26B', move:'#4A7BF7', look:'#A566E8', sound:'#F06AA8', ctrl:'#F2A03D', judge:'#23C2C7', calc:'#2A8DF2', data:'#FF7043', func:'#8D6E63' };
+
+  if (!Blockly.Blocks['entry_when_start']) {
+    Blockly.defineBlocksWithJsonArray([
+    { type:'entry_when_start', message0:'▶ 시작하기 버튼을 클릭했을 때', nextStatement:null, colour:C.start },
+    { type:'entry_move', message0:'%1 만큼 움직이기', args0:[{type:'input_value',name:'VALUE',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.move, inputsInline:true },
+    { type:'entry_change_xy', message0:'x %1 y %2 만큼 움직이기', args0:[{type:'input_value',name:'X',check:'Number'},{type:'input_value',name:'Y',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.move, inputsInline:true },
+    { type:'entry_set_xy', message0:'x %1 y %2 위치로 이동하기', args0:[{type:'input_value',name:'X',check:'Number'},{type:'input_value',name:'Y',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.move, inputsInline:true },
+    { type:'entry_turn', message0:'%1 으로 %2 도 회전하기', args0:[{type:'field_dropdown',name:'DIR',options:[['시계 방향','CW'],['반시계 방향','CCW']]},{type:'input_value',name:'DEG',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.move, inputsInline:true },
+    { type:'entry_point', message0:'방향을 %1 도로 정하기', args0:[{type:'input_value',name:'DEG',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.move, inputsInline:true },
+    { type:'entry_bounce', message0:'화면 끝에 닿으면 튕기기', previousStatement:null, nextStatement:null, colour:C.move },
+    { type:'entry_say_for', message0:'%1 을(를) %2 초 동안 말하기', args0:[{type:'input_value',name:'TEXT'},{type:'input_value',name:'SECS',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.look, inputsInline:true },
+    { type:'entry_say', message0:'%1 말하기', args0:[{type:'input_value',name:'TEXT'}], previousStatement:null, nextStatement:null, colour:C.look, inputsInline:true },
+    { type:'entry_change_size', message0:'크기를 %1 만큼 바꾸기', args0:[{type:'input_value',name:'VALUE',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.look, inputsInline:true },
+    { type:'entry_set_size', message0:'크기를 %1 %로 정하기', args0:[{type:'input_value',name:'VALUE',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.look, inputsInline:true },
+    { type:'entry_visible', message0:'%1', args0:[{type:'field_dropdown',name:'MODE',options:[['모양 보이기','SHOW'],['모양 숨기기','HIDE']]}], previousStatement:null, nextStatement:null, colour:C.look },
+    { type:'entry_pen', message0:'그리기 %1', args0:[{type:'field_dropdown',name:'MODE',options:[['시작하기','ON'],['멈추기','OFF'],['모두 지우기','CLEAR']]}], previousStatement:null, nextStatement:null, colour:C.look },
+    { type:'entry_sound', message0:'소리 %1 재생하기', args0:[{type:'field_dropdown',name:'SND',options:[['삐용','beep'],['박수','clap'],['점프','jump'],['성공','win']]}], previousStatement:null, nextStatement:null, colour:C.sound },
+    { type:'entry_wait', message0:'%1 초 기다리기', args0:[{type:'input_value',name:'SECS',check:'Number'}], previousStatement:null, nextStatement:null, colour:C.ctrl, inputsInline:true },
+    { type:'entry_get_x', message0:'x 좌푯값', output:'Number', colour:C.calc },
+    { type:'entry_get_y', message0:'y 좌푯값', output:'Number', colour:C.calc },
+    { type:'entry_get_dir', message0:'방향', output:'Number', colour:C.calc },
+    { type:'entry_touch_edge', message0:'벽에 닿았는가?', output:'Boolean', colour:C.judge }
+    ]);
+  }
+
+  const num = n => ({shadow:{type:'math_number',fields:{NUM:n}}});
+  const txt = t => ({shadow:{type:'text',fields:{TEXT:t}}});
+
+  function buildToolbox(lv){
+    const vip = lv >= 9, at = n => vip || lv >= n;
+    const cats = [{kind:'category', name:'시작', colour:C.start, contents:[{kind:'block', type:'entry_when_start'}]}];
+    const move = [
+      {kind:'block', type:'entry_move', inputs:{VALUE:num(10)}},
+      {kind:'block', type:'entry_change_xy', inputs:{X:num(10), Y:num(0)}},
+      {kind:'block', type:'entry_set_xy', inputs:{X:num(0), Y:num(0)}}
+    ];
+    if (at(2)) move.push({kind:'block', type:'entry_turn', inputs:{DEG:num(90)}});
+    if (at(4)) move.push({kind:'block', type:'entry_point', inputs:{DEG:num(90)}}, {kind:'block', type:'entry_bounce'});
+    cats.push({kind:'category', name:'움직임', colour:C.move, contents:move});
+
+    const look = [
+      {kind:'block', type:'entry_say', inputs:{TEXT:txt('안녕!')}},
+      {kind:'block', type:'entry_say_for', inputs:{TEXT:txt('반가워!'), SECS:num(2)}},
+      {kind:'block', type:'entry_visible'}
+    ];
+    if (at(3)) look.push({kind:'block', type:'entry_change_size', inputs:{VALUE:num(10)}}, {kind:'block', type:'entry_set_size', inputs:{VALUE:num(100)}});
+    if (at(4)) look.push({kind:'block', type:'entry_pen'});
+    cats.push({kind:'category', name:'생김새', colour:C.look, contents:look});
+    cats.push({kind:'category', name:'소리', colour:C.sound, contents:[{kind:'block', type:'entry_sound'}]});
+
+    const ctrl = [{kind:'block', type:'entry_wait', inputs:{SECS:num(1)}}];
+    if (at(2)) ctrl.push({kind:'block', type:'controls_repeat_ext', inputs:{TIMES:num(10)}}, {kind:'block', type:'controls_if'});
+    if (at(4)) ctrl.push({kind:'block', type:'controls_whileUntil'}, {kind:'block', type:'controls_if', extraState:{elseIfCount:0, hasElse:true}});
+    cats.push({kind:'category', name:'흐름', colour:C.ctrl, contents:ctrl});
+
+    if (at(2)) {
+      const judge = [{kind:'block', type:'logic_compare', inputs:{A:num(0), B:num(10)}}, {kind:'block', type:'logic_operation'}, {kind:'block', type:'logic_boolean'}];
+      if (at(4)) judge.push({kind:'block', type:'logic_negate'}, {kind:'block', type:'entry_touch_edge'});
+      cats.push({kind:'category', name:'판단', colour:C.judge, contents:judge});
+    }
+    if (at(3)) {
+      const calc = [{kind:'block', type:'math_number'}, {kind:'block', type:'math_arithmetic', inputs:{A:num(1), B:num(1)}}, {kind:'block', type:'math_random_int', inputs:{FROM:num(1), TO:num(10)}}];
+      if (at(4)) calc.push({kind:'block', type:'entry_get_x'}, {kind:'block', type:'entry_get_y'}, {kind:'block', type:'entry_get_dir'});
+      if (at(5)) calc.push({kind:'block', type:'text'}, {kind:'block', type:'text_join'});
+      cats.push({kind:'category', name:'계산', colour:C.calc, contents:calc});
+    }
+    if (at(3)) cats.push({kind:'category', name:'변수', colour:C.data, custom:'VARIABLE'});
+    if (at(5)) cats.push({kind:'category', name:'함수', colour:C.func, custom:'PROCEDURE'});
+    return {kind:'categoryToolbox', contents:cats};
+  }
+
+  const SAVE_KEY = 'cs_work_' + session.username + '_' + problem.id;
+  const ws = Blockly.inject('bly', {
+    toolbox: buildToolbox(problem.level), renderer:'zelos', horizontalLayout:false, trashcan:true, sounds:false,
+    media:'https://cdn.jsdelivr.net/npm/blockly@13.2.1/media/',
+    grid:{spacing:24, length:3, colour:'#DCE4F7', snap:true},
+    zoom:{controls:true, wheel:true, startScale: innerWidth < 700 ? 0.72 : 0.9, minScale:0.4, maxScale:1.6},
+    move:{scrollbars:true, drag:true, wheel:true}
+  });
+
+  (function loadSaved(){
+    try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { Blockly.serialization.workspaces.load(JSON.parse(raw), ws); return; } } catch(e){}
+    Blockly.serialization.workspaces.load({blocks:{languageVersion:0, blocks:[{
+      type:'entry_when_start', x:40, y:40,
+      next:{block:{type:'entry_move', inputs:{VALUE:{shadow:{type:'math_number',fields:{NUM:10}}}}}}
+    }]}}, ws);
+  })();
+
+  let saveTimer = null;
+  ws.addChangeListener(() => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(Blockly.serialization.workspaces.save(ws))); } catch(e){} }, 400);
+  });
+  const onResize = () => Blockly.svgResize(ws);
+  addEventListener('resize', onResize);
+  setTimeout(() => Blockly.svgResize(ws), 60);
+
+  /* ---- 무대 ---- */
+  const cv = document.getElementById('stage'), cx = cv.getContext('2d');
+  const W = 480, H = 270;
+  const P = () => ({x:0, y:0, dir:90, size:100, visible:true, say:'', pen:false, trail:[]});
+  let S = P(), sayLog = [], touchedGoal = false, rafId = null;
+  const toPx = (x, y) => [ (x + W/2) * 2, (H/2 - y) * 2 ];
+
+  function drawBg(){
+    const g = cx.createLinearGradient(0, 0, 0, cv.height);
+    if (problem.category === 'game')      { g.addColorStop(0,'#101A3C'); g.addColorStop(1,'#1E2E63'); }
+    else if (problem.category === 'math') { g.addColorStop(0,'#101A3C'); g.addColorStop(1,'#152449'); }
+    else                                   { g.addColorStop(0,'#123A2E'); g.addColorStop(1,'#0E2A22'); }
+    cx.fillStyle = g; cx.fillRect(0,0,cv.width,cv.height);
+    cx.lineWidth = 2;
+    if (problem.category === 'math') {
+      cx.strokeStyle='rgba(160,185,255,.14)';
+      for (let x=-240;x<=240;x+=40){ const [px]=toPx(x,0); cx.beginPath(); cx.moveTo(px,0); cx.lineTo(px,cv.height); cx.stroke(); }
+      for (let y=-120;y<=120;y+=40){ const [,py]=toPx(0,y); cx.beginPath(); cx.moveTo(0,py); cx.lineTo(cv.width,py); cx.stroke(); }
+      cx.strokeStyle='rgba(185,242,39,.55)'; cx.lineWidth=3;
+      const [cxp,cyp]=toPx(0,0);
+      cx.beginPath(); cx.moveTo(cxp,0); cx.lineTo(cxp,cv.height); cx.moveTo(0,cyp); cx.lineTo(cv.width,cyp); cx.stroke();
+    } else if (problem.category === 'move') {
+      cx.strokeStyle='rgba(255,255,255,.18)'; cx.setLineDash([18,22]);
+      for (let y=-90;y<=90;y+=60){ const [,py]=toPx(0,y); cx.beginPath(); cx.moveTo(0,py); cx.lineTo(cv.width,py); cx.stroke(); }
+      cx.setLineDash([]);
+    } else {
+      cx.fillStyle='rgba(255,255,255,.07)';
+      for (let x=-220;x<=220;x+=55) for (let y=-110;y<=110;y+=55){ const [px,py]=toPx(x,y); cx.beginPath(); cx.arc(px,py,3,0,7); cx.fill(); }
+    }
+    if (problem.goal.type === 'position') {
+      const [gx, gy] = toPx(problem.goal.x, problem.goal.y);
+      cx.strokeStyle = 'rgba(255,197,61,.9)'; cx.lineWidth = 3;
+      cx.beginPath(); cx.arc(gx, gy, problem.goal.tol * 2, 0, 7); cx.stroke();
+      cx.fillStyle = '#FFC53D';
+      cx.beginPath(); cx.moveTo(gx, gy-16); cx.lineTo(gx, gy+16); cx.stroke();
+      cx.beginPath(); cx.moveTo(gx, gy-16); cx.lineTo(gx+18, gy-10); cx.lineTo(gx, gy-4); cx.fill();
+    }
+  }
+  function drawBot(){
+    if (!S.visible) return;
+    const [px, py] = toPx(S.x, S.y), k = (S.size/100)*2;
+    cx.save(); cx.translate(px,py); cx.rotate((90-S.dir)*Math.PI/180); cx.scale(k,k);
+    cx.fillStyle='rgba(0,0,0,.35)'; cx.beginPath(); cx.ellipse(0,26,20,6,0,0,7); cx.fill();
+    cx.fillStyle='#F5F8FF'; cx.beginPath(); cx.roundRect(-18,-22,36,42,12); cx.fill();
+    cx.fillStyle='#16203C'; cx.beginPath(); cx.roundRect(-13,-14,26,15,7); cx.fill();
+    cx.fillStyle='#5FE3FF'; cx.beginPath(); cx.arc(-5,-6.5,3.1,0,7); cx.arc(5,-6.5,3.1,0,7); cx.fill();
+    cx.fillStyle='#5B3DF5'; cx.beginPath(); cx.roundRect(-16,6,32,9,4); cx.fill();
+    cx.fillStyle='#B9F227'; cx.beginPath(); cx.moveTo(0,-30); cx.lineTo(6,-22); cx.lineTo(-6,-22); cx.fill();
+    cx.restore();
+    if (S.say) {
+      cx.font='600 20px "Noto Sans KR", sans-serif';
+      const w = Math.min(cx.measureText(S.say).width + 28, cv.width - 40);
+      const bx = Math.max(12, Math.min(px - w/2, cv.width - w - 12));
+      const by = Math.max(12, py - 50*k - 46);
+      cx.fillStyle='#FFFFFF'; cx.beginPath(); cx.roundRect(bx,by,w,40,14); cx.fill();
+      cx.beginPath(); cx.moveTo(px-8,by+38); cx.lineTo(px+8,by+38); cx.lineTo(px,by+54); cx.fill();
+      cx.fillStyle='#16203C'; cx.textBaseline='middle'; cx.fillText(S.say, bx+14, by+21, w-28);
+    }
+  }
+  function drawTrail(){
+    if (S.trail.length < 2) return;
+    cx.strokeStyle='#FFC53D'; cx.lineWidth=5; cx.lineCap='round';
+    cx.beginPath(); S.trail.forEach((p,i) => { const [x,y]=toPx(p.x,p.y); (p.up||i===0)?cx.moveTo(x,y):cx.lineTo(x,y); }); cx.stroke();
+  }
+  function checkGoal(){
+    if (problem.goal.type === 'position') { const d = Math.hypot(S.x-problem.goal.x, S.y-problem.goal.y); if (d <= problem.goal.tol) touchedGoal = true; }
+  }
+  function render(){ drawBg(); drawTrail(); drawBot(); }
+  function resetStage(){ S = P(); sayLog = []; touchedGoal = false; render(); hideResult(); }
+  (function loop(){ render(); rafId = requestAnimationFrame(loop); })();
+
+  let actx = null;
+  const TONES = {beep:[880,.12], clap:[220,.08], jump:[520,.16], win:[660,.3]};
+  function playSound(k){
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const [f,d] = TONES[k] || TONES.beep;
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = k==='clap' ? 'square' : 'triangle';
+      o.frequency.setValueAtTime(f, actx.currentTime);
+      if (k==='win') o.frequency.linearRampToValueAtTime(f*1.6, actx.currentTime+d);
+      g.gain.setValueAtTime(.18, actx.currentTime); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime+d);
+      o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+d);
+    } catch(e){}
+  }
+
+  /* ---- 인터프리터 ---- */
+  const STOP = Symbol('stop');
+  let running = false, speed = 140; const vars = Object.create(null); let scopes = [];
+  const sleep = ms => new Promise((res, rej) => {
+    const t0 = performance.now();
+    (function tick(){ if (!running) return rej(STOP); checkGoal(); if (performance.now()-t0 >= ms) return res(); requestAnimationFrame(tick); })();
+  });
+  const N = v => { const n = Number(v); return isNaN(n) ? 0 : n; };
+  const clampPos = () => { S.x = Math.max(-W/2, Math.min(W/2, S.x)); S.y = Math.max(-H/2, Math.min(H/2, S.y)); };
+  const track = up => { if (S.pen) S.trail.push({x:S.x, y:S.y, up:!!up}); };
+  async function glide(tx, ty){
+    const sx=S.x, sy=S.y, steps=Math.max(1, Math.round(speed/16));
+    for (let i=1;i<=steps;i++){ S.x=sx+(tx-sx)*i/steps; S.y=sy+(ty-sy)*i/steps; clampPos(); track(); checkGoal(); await sleep(16); }
+  }
+  async function val(b, dflt){
+    if (!b) return dflt;
+    const f = n => b.getInputTargetBlock(n);
+    switch (b.type) {
+      case 'math_number': return N(b.getFieldValue('NUM'));
+      case 'text': return String(b.getFieldValue('TEXT'));
+      case 'logic_boolean': return b.getFieldValue('BOOL') === 'TRUE';
+      case 'entry_get_x': return Math.round(S.x);
+      case 'entry_get_y': return Math.round(S.y);
+      case 'entry_get_dir': return Math.round(S.dir);
+      case 'entry_touch_edge': return Math.abs(S.x) >= W/2-1 || Math.abs(S.y) >= H/2-1;
+      case 'math_arithmetic': {
+        const a=N(await val(f('A'),0)), c=N(await val(f('B'),0));
+        switch (b.getFieldValue('OP')) { case 'ADD': return a+c; case 'MINUS': return a-c; case 'MULTIPLY': return a*c; case 'DIVIDE': return c===0?0:a/c; case 'POWER': return Math.pow(a,c); }
+        return 0;
+      }
+      case 'math_random_int': {
+        const a=N(await val(f('FROM'),1)), c=N(await val(f('TO'),10));
+        const lo=Math.ceil(Math.min(a,c)), hi=Math.floor(Math.max(a,c));
+        return lo + Math.floor(Math.random()*(hi-lo+1));
+      }
+      case 'logic_compare': {
+        const a=await val(f('A'),0), c=await val(f('B'),0);
+        const bad = isNaN(Number(a)) || isNaN(Number(c));
+        const x = bad ? String(a) : Number(a), y = bad ? String(c) : Number(c);
+        switch (b.getFieldValue('OP')) { case 'EQ': return x===y; case 'NEQ': return x!==y; case 'LT': return x<y; case 'LTE': return x<=y; case 'GT': return x>y; case 'GTE': return x>=y; }
+        return false;
+      }
+      case 'logic_operation': { const a = !!(await val(f('A'), false)); return b.getFieldValue('OP')==='AND' ? (a && !!(await val(f('B'),false))) : (a || !!(await val(f('B'),false))); }
+      case 'logic_negate': return !(await val(f('BOOL'), false));
+      case 'text_join': { let out=''; for (let i=0;i<(b.itemCount_||2);i++) out += await val(f('ADD'+i), ''); return out; }
+      case 'variables_get': return lookup(b.getField('VAR').getText());
+      case 'procedures_callreturn': return await callProc(b, true);
+    }
+    const first = b.inputList.find(i => i.connection && i.connection.targetBlock());
+    return first ? await val(first.connection.targetBlock(), dflt) : dflt;
+  }
+  function lookup(name){ for (let i=scopes.length-1;i>=0;i--) if (name in scopes[i]) return scopes[i][name]; return name in vars ? vars[name] : 0; }
+  function assign(name, v){ for (let i=scopes.length-1;i>=0;i--) if (name in scopes[i]) { scopes[i][name]=v; return; } vars[name]=v; }
+  function findProc(name){ return ws.getTopBlocks(false).find(b => (b.type==='procedures_defnoreturn'||b.type==='procedures_defreturn') && b.getFieldValue('NAME')===name); }
+  async function callProc(b, wantValue){
+    const def = findProc(b.getFieldValue('NAME')); if (!def) return 0;
+    if (scopes.length > 40) throw STOP;
+    const names = def.arguments_ || []; const scope = {};
+    for (let i=0;i<names.length;i++) scope[names[i]] = await val(b.getInputTargetBlock('ARG'+i), 0);
+    scopes.push(scope);
+    try { await exec(def.getInputTargetBlock('STACK')); return wantValue ? await val(def.getInputTargetBlock('RETURN'), 0) : 0; }
+    finally { scopes.pop(); }
+  }
+  async function step(b){
+    const f = n => b.getInputTargetBlock(n);
+    switch (b.type) {
+      case 'entry_when_start': return;
+      case 'entry_move': { const d=N(await val(f('VALUE'),10)), r=S.dir*Math.PI/180; await glide(S.x+Math.cos(r)*d, S.y+Math.sin(r)*d); return; }
+      case 'entry_change_xy': await glide(S.x+N(await val(f('X'),0)), S.y+N(await val(f('Y'),0))); return;
+      case 'entry_set_xy': track(true); await glide(N(await val(f('X'),0)), N(await val(f('Y'),0))); return;
+      case 'entry_turn': { const d=N(await val(f('DEG'),90)); S.dir += (b.getFieldValue('DIR')==='CW'?-d:d); S.dir=((S.dir%360)+360)%360; await sleep(speed); return; }
+      case 'entry_point': S.dir = ((N(await val(f('DEG'),90))%360)+360)%360; await sleep(speed); return;
+      case 'entry_bounce': {
+        if (Math.abs(S.x) >= W/2-1) { S.dir = 180-S.dir; playSound('beep'); }
+        if (Math.abs(S.y) >= H/2-1) { S.dir = -S.dir; playSound('beep'); }
+        S.dir = ((S.dir%360)+360)%360; S.x = Math.max(-W/2+2, Math.min(W/2-2, S.x)); S.y = Math.max(-H/2+2, Math.min(H/2-2, S.y));
+        await sleep(30); return;
+      }
+      case 'entry_say': { S.say = String(await val(f('TEXT'), '')); sayLog.push(S.say); await sleep(speed); return; }
+      case 'entry_say_for': { S.say = String(await val(f('TEXT'), '')); sayLog.push(S.say); await sleep(Math.max(0, N(await val(f('SECS'),1))*1000)); S.say = ''; return; }
+      case 'entry_change_size': S.size = Math.max(10, Math.min(400, S.size+N(await val(f('VALUE'),10)))); await sleep(speed); return;
+      case 'entry_set_size': S.size = Math.max(10, Math.min(400, N(await val(f('VALUE'),100)))); await sleep(speed); return;
+      case 'entry_visible': S.visible = b.getFieldValue('MODE')==='SHOW'; await sleep(speed); return;
+      case 'entry_pen': { const m=b.getFieldValue('MODE'); if (m==='ON'){S.pen=true; track(true);} if (m==='OFF') S.pen=false; if (m==='CLEAR') S.trail=[]; await sleep(60); return; }
+      case 'entry_sound': playSound(b.getFieldValue('SND')); await sleep(120); return;
+      case 'entry_wait': await sleep(Math.max(0, N(await val(f('SECS'),1))*1000)); return;
+      case 'controls_repeat_ext':
+      case 'controls_repeat': {
+        const n = Math.min(10000, Math.max(0, Math.floor(b.type==='controls_repeat' ? N(b.getFieldValue('TIMES')) : N(await val(f('TIMES'),10)))));
+        for (let i=0;i<n;i++) await exec(f('DO')); return;
+      }
+      case 'controls_whileUntil': {
+        const until = b.getFieldValue('MODE')==='UNTIL'; let guard=0;
+        while (guard++ < 100000) { let c = !!(await val(f('BOOL'), false)); if (until) c=!c; if (!c) break; await exec(f('DO')); if (!f('DO')) await sleep(16); }
+        return;
+      }
+      case 'controls_if': {
+        let i=0, done=false;
+        while (b.getInput('IF'+i)) { if (await val(f('IF'+i), false)) { await exec(f('DO'+i)); done=true; break; } i++; }
+        if (!done && b.getInput('ELSE')) await exec(f('ELSE'));
+        return;
+      }
+      case 'variables_set': assign(b.getField('VAR').getText(), await val(f('VALUE'), 0)); await sleep(speed/2); return;
+      case 'math_change': { const n = b.getField('VAR').getText(); assign(n, N(lookup(n)) + N(await val(f('DELTA'), 1))); await sleep(speed/2); return; }
+      case 'procedures_callnoreturn': await callProc(b, false); return;
+      case 'procedures_defnoreturn':
+      case 'procedures_defreturn': return;
+    }
+    await sleep(20);
+  }
+  async function exec(b){ while (b) { if (!running) throw STOP; ws.highlightBlock(b.id); await step(b); b = b.getNextBlock(); } }
+
+  const btnRun = document.getElementById('btnRun'), btnStop = document.getElementById('btnStop'), resultBox = document.getElementById('resultBox');
+  function showResult(html, kind){ resultBox.innerHTML = html; resultBox.className = 'result show ' + kind; }
+  function hideResult(){ resultBox.className = 'result'; }
+  const GAME_LINK = '<a href="#/arcade" class="result-link">🎮 게임하러 가기</a>';
+  function setRunning(on){ running = on; btnRun.hidden = on; btnStop.hidden = !on; if (!on && ws) ws.highlightBlock(null); }
+
+  function grade(){
+    if (problem.goal.type === 'free') { showResult('실행 완료! 자유 연습 문제라 자동 채점은 없어.', 'info'); return; }
+    if (problem.goal.type === 'position') {
+      checkGoal();
+      if (touchedGoal) { markSolved(session.username, problem.id); showResult('🎉 정답이야! 목표 지점에 도착했어. ' + GAME_LINK, 'ok'); playSound('win'); }
+      else showResult('아직이야. 목표 지점(오차 범위)까지 이동해봐.', 'no');
+      return;
+    }
+    if (problem.goal.type === 'say') {
+      const hit = sayLog.some(t => t.trim() === problem.goal.text.trim());
+      if (hit) { markSolved(session.username, problem.id); showResult('🎉 정답이야! 원하는 문장을 말했어. ' + GAME_LINK, 'ok'); playSound('win'); }
+      else showResult('아직이야. "' + problem.goal.text + '" 라고 말하는 블록을 실행해봐.', 'no');
+      return;
+    }
+  }
+
+  btnRun.onclick = async () => {
+    if (running) return;
+    const hats = ws.getTopBlocks(true).filter(b => b.type === 'entry_when_start');
+    if (!hats.length) { showResult('시작 블록을 먼저 붙여줘.', 'no'); return; }
+    S = P(); sayLog = []; touchedGoal = false; scopes = [];
+    for (const k in vars) delete vars[k];
+    hideResult(); setRunning(true);
+    let stopped = false;
+    try { await Promise.all(hats.map(h => exec(h.getNextBlock()))); }
+    catch (e) { if (e === STOP) stopped = true; else console.error(e); }
+    setRunning(false);
+    if (!stopped) grade();
+  };
+  btnStop.onclick = () => setRunning(false);
+  document.getElementById('btnReset').onclick = () => { setRunning(false); setTimeout(resetStage, 30); };
+
+  setTeardown(() => {
+    setRunning(false);
+    cancelAnimationFrame(rafId);
+    removeEventListener('resize', onResize);
+    try { ws.dispose(); } catch(e){}
+  });
+}
+
+/* =========================================================
+   6. 아케이드 (미니게임 3종)
+   ========================================================= */
+function renderArcadeView(view){
+  const session = requireAuth(false);
+  if (!session) return;
+
+  const solvedCount = getSolvedSet(session.username).size;
+  const speedBonus = Math.min(solvedCount, 10);
+  let stopGame = null;
+
+  if (solvedCount < 1) {
+    view.innerHTML =
+      '<div class="page"><div class="card locked"><div class="ic">🔒</div>' +
+        '<h1 class="title">아직 게임이 잠겨 있어</h1>' +
+        '<p class="sub">문제를 1개 이상 풀면 미니게임 3종이 열려. 목록에서 쉬운 문제부터 풀어봐!</p>' +
+        '<a href="#/problems" class="btn primary">문제 풀러 가기</a>' +
+      '</div></div>';
+    return;
+  }
+
+  const GAMES = [
+    { id:'jump',  emo:'🦘', name:'장애물 점프',   desc:'탭하거나 스페이스바로 점프해서 장애물을 피해봐.', start: startJumpGame },
+    { id:'catch', emo:'⭐', name:'별 캐치',       desc:'좌우로 움직여서 별을 모으고 폭탄은 피해봐.',       start: startCatchGame },
+    { id:'lane',  emo:'🛤️', name:'3레인 피하기', desc:'세 개의 차선을 오가며 떨어지는 블록을 피해봐.',   start: startLaneGame }
+  ];
+
+  function showMenu(){
+    if (stopGame) { stopGame(); stopGame = null; }
+    view.innerHTML =
+      '<div class="page">' +
+        '<p class="crumb">미니게임</p><h1 class="title">뭘 해볼까?</h1>' +
+        '<p class="sub">문제를 많이 풀수록(최대 10개) 게임 속도가 조금씩 빨라져.</p>' +
+        '<div class="glist" id="glist"></div>' +
+      '</div>';
+    const glist = document.getElementById('glist');
+    GAMES.forEach(g => {
+      const best = getHighScore(session.username, g.id);
+      const a = document.createElement('button'); a.className = 'gcard card';
+      a.innerHTML = '<span class="ic">'+g.emo+'</span><h3>'+g.name+'</h3><p>'+g.desc+'</p><span class="best">최고 기록 '+best+'점</span>';
+      a.onclick = () => g.start();
+      glist.appendChild(a);
+    });
+  }
+
+  function mountShell(title, desc, w, h){
+    view.innerHTML =
+      '<div class="gwrap">' +
+        '<button class="btn line small gtopbar" id="btnMenu" style="padding:8px 12px;font-size:13px">← 메뉴</button>' +
+        '<div class="hud"><span>점수 <b id="hudScore">0</b></span><span>최고 <b id="hudBest">0</b></span></div>' +
+        '<canvas class="stage-cv" id="cv" width="'+w+'" height="'+h+'"></canvas>' +
+        '<div class="overlay" id="overlay"><h2 id="ovTitle">'+title+'</h2><p id="ovDesc">'+desc+'</p><button class="btn go" id="btnStart">탭해서 시작</button></div>' +
+      '</div>';
+    document.getElementById('btnMenu').onclick = showMenu;
+    return {
+      cv: document.getElementById('cv'), hudScore: document.getElementById('hudScore'), hudBest: document.getElementById('hudBest'),
+      overlay: document.getElementById('overlay'), ovTitle: document.getElementById('ovTitle'), ovDesc: document.getElementById('ovDesc'),
+      btnStart: document.getElementById('btnStart')
+    };
+  }
+
+  let actx = null;
+  function beep(freq, dur, type){
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'triangle'; o.frequency.setValueAtTime(freq, actx.currentTime);
+      g.gain.setValueAtTime(.16, actx.currentTime); g.gain.exponentialRampToValueAtTime(.001, actx.currentTime+dur);
+      o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime+dur);
+    } catch(e){}
+  }
+
+  function startJumpGame(){
+    if (stopGame) stopGame();
+    const ui = mountShell('🦘 장애물 점프', '화면을 탭하거나 스페이스바를 눌러서 점프! 장애물에 닿지 않고 최대한 오래 버텨봐.', 960, 420);
+    const cx = ui.cv.getContext('2d'); const W=480, H=210, GROUND=H-26;
+    const toPx = (x,y) => [x*2,y*2];
+    ui.hudBest.textContent = getHighScore(session.username, 'jump');
+    let state='idle', bot, obstacles, score, spawnTimer, speed, raf, last;
+    function reset(){ bot={x:70,y:GROUND,vy:0,w:26,h:34,onGround:true,rot:0}; obstacles=[]; score=0; spawnTimer=0; speed=150+speedBonus*6; }
+    function jump(){ if (state==='playing' && bot.onGround) { bot.vy=-190; bot.onGround=false; beep(520,.1); } }
+    function drawBg(){
+      const g=cx.createLinearGradient(0,0,0,ui.cv.height); g.addColorStop(0,'#0E1630'); g.addColorStop(1,'#1E2E63');
+      cx.fillStyle=g; cx.fillRect(0,0,ui.cv.width,ui.cv.height);
+      cx.strokeStyle='rgba(185,242,39,.6)'; cx.lineWidth=4;
+      const [,gy]=toPx(0, GROUND+bot.h/2+4); cx.beginPath(); cx.moveTo(0,gy); cx.lineTo(ui.cv.width,gy); cx.stroke();
+    }
+    function drawBot(){
+      const [px,py]=toPx(bot.x,bot.y);
+      cx.save(); cx.translate(px,py); cx.rotate(bot.rot); cx.scale(2,2);
+      cx.fillStyle='rgba(0,0,0,.3)'; cx.beginPath(); cx.ellipse(0,bot.h/2+3,14,4,0,0,7); cx.fill();
+      cx.fillStyle='#F5F8FF'; cx.beginPath(); cx.roundRect(-13,-17,26,32,9); cx.fill();
+      cx.fillStyle='#16203C'; cx.beginPath(); cx.roundRect(-9,-11,18,11,5); cx.fill();
+      cx.fillStyle='#5FE3FF'; cx.beginPath(); cx.arc(-4,-5.5,2.3,0,7); cx.arc(4,-5.5,2.3,0,7); cx.fill();
+      cx.fillStyle='#5B3DF5'; cx.beginPath(); cx.roundRect(-11,4,22,7,3); cx.fill();
+      cx.restore();
+    }
+    function spawn(){ const h=18+Math.random()*22; obstacles.push({x:W+20,y:GROUND,w:14+Math.random()*10,h}); }
+    function drawObstacle(o){ const [px,py]=toPx(o.x,o.y-o.h/2); cx.fillStyle='#FF5C72'; cx.beginPath(); cx.roundRect(px-o.w, py-o.h, o.w*2, o.h*2, 4); cx.fill(); }
+    const hit=(a,b)=>Math.abs(a.x-b.x)<(a.w+b.w)/2 && Math.abs(a.y-b.y)<(a.h+b.h)/2;
+    function gameOver(){
+      state='over'; beep(160,.3,'square');
+      const isNew = setHighScore(session.username,'jump',Math.floor(score));
+      ui.hudBest.textContent = getHighScore(session.username,'jump');
+      ui.ovTitle.textContent = isNew ? '🏆 최고 기록 갱신!' : '💥 부딪혔어!';
+      ui.ovDesc.textContent = '이번 점수: '+Math.floor(score)+'점 · 최고 기록: '+getHighScore(session.username,'jump')+'점';
+      ui.btnStart.textContent = '다시 도전하기'; ui.overlay.style.display='flex';
+    }
+    function loop(now){
+      const dt=Math.min(48,now-last); last=now;
+      if (state==='playing') {
+        speed+=dt*0.004; score+=dt*0.02; ui.hudScore.textContent=Math.floor(score);
+        bot.vy+=620*(dt/1000); bot.y+=bot.vy*(dt/1000);
+        if (bot.y>=GROUND) { bot.y=GROUND; bot.vy=0; bot.onGround=true; }
+        bot.rot = bot.onGround?0:Math.max(-0.5, Math.min(0.5, bot.vy/500));
+        spawnTimer-=dt;
+        if (spawnTimer<=0) { spawn(); spawnTimer=Math.max(650,1300-speed*2)+Math.random()*400; }
+        const botBox={x:bot.x,y:bot.y-bot.h/2,w:bot.w,h:bot.h};
+        for (let i=obstacles.length-1;i>=0;i--){ const o=obstacles[i]; o.x-=speed*(dt/1000); if (hit(botBox,{x:o.x,y:o.y-o.h/2,w:o.w,h:o.h})) gameOver(); if (o.x<-30) obstacles.splice(i,1); }
+      }
+      drawBg(); obstacles.forEach(drawObstacle); drawBot(); raf=requestAnimationFrame(loop);
+    }
+    function start(){ reset(); state='playing'; ui.overlay.style.display='none'; }
+    ui.btnStart.onclick = start;
+    ui.cv.addEventListener('pointerdown', e => { e.preventDefault(); jump(); });
+    const keyHandler = e => { if (e.code==='Space'||e.code==='ArrowUp') { e.preventDefault(); jump(); } };
+    addEventListener('keydown', keyHandler);
+    reset(); last=performance.now(); raf=requestAnimationFrame(loop);
+    stopGame = () => { cancelAnimationFrame(raf); removeEventListener('keydown', keyHandler); };
+  }
+
+  function startCatchGame(){
+    if (stopGame) stopGame();
+    const ui = mountShell('⭐ 별 캐치', '좌우로 바구니를 움직여서 별을 모아봐. 폭탄을 3번 받으면 게임이 끝나!', 960, 420);
+    const cx = ui.cv.getContext('2d'); const W=480, H=210;
+    const toPx = (x,y) => [x*2,y*2];
+    ui.hudBest.textContent = getHighScore(session.username, 'catch');
+    let state='idle', basket, items, score, lives, spawnTimer, fallSpeed, raf, last;
+    const keys = {left:false,right:false};
+    function reset(){ basket={x:W/2,y:H-18,w:56,h:16}; items=[]; score=0; lives=3; spawnTimer=0; fallSpeed=70+speedBonus*5; }
+    function spawn(){ const isBomb=Math.random()<0.22; items.push({x:30+Math.random()*(W-60),y:-10,r:10,type:isBomb?'bomb':'star',spin:Math.random()*6}); }
+    function drawBg(){ const g=cx.createLinearGradient(0,0,0,ui.cv.height); g.addColorStop(0,'#12123A'); g.addColorStop(1,'#241A4E'); cx.fillStyle=g; cx.fillRect(0,0,ui.cv.width,ui.cv.height); }
+    function drawBasket(){
+      const [px,py]=toPx(basket.x,basket.y);
+      cx.save(); cx.translate(px,py); cx.scale(2,2);
+      cx.fillStyle='#5B3DF5'; cx.beginPath(); cx.roundRect(-basket.w/2,-basket.h/2,basket.w,basket.h,8); cx.fill();
+      cx.strokeStyle='#B9F227'; cx.lineWidth=3; cx.beginPath(); cx.moveTo(-basket.w/2+4,-basket.h/2); cx.lineTo(basket.w/2-4,-basket.h/2); cx.stroke();
+      cx.restore();
+    }
+    function drawItem(it){
+      const [px,py]=toPx(it.x,it.y);
+      cx.save(); cx.translate(px,py); cx.rotate(it.spin); cx.scale(2,2);
+      if (it.type==='star') {
+        cx.fillStyle='#FFC53D'; cx.beginPath();
+        for (let i=0;i<5;i++){ const a1=-Math.PI/2+i*(Math.PI*2/5), a2=a1+Math.PI/5; cx.lineTo(Math.cos(a1)*it.r,Math.sin(a1)*it.r); cx.lineTo(Math.cos(a2)*it.r*0.45,Math.sin(a2)*it.r*0.45); }
+        cx.closePath(); cx.fill();
+      } else {
+        cx.fillStyle='#16203C'; cx.beginPath(); cx.arc(0,0,it.r,0,7); cx.fill();
+        cx.strokeStyle='#FF5C72'; cx.lineWidth=2.5; cx.beginPath(); cx.moveTo(-4,-4); cx.lineTo(4,4); cx.moveTo(4,-4); cx.lineTo(-4,4); cx.stroke();
+      }
+      cx.restore();
+    }
+    function drawLives(){ cx.font='20px sans-serif'; for (let i=0;i<3;i++) cx.fillText(i<lives?'❤️':'🖤', 14+i*26, 30); }
+    function gameOver(){
+      state='over'; beep(160,.3,'square');
+      const isNew = setHighScore(session.username,'catch',Math.floor(score));
+      ui.hudBest.textContent = getHighScore(session.username,'catch');
+      ui.ovTitle.textContent = isNew ? '🏆 최고 기록 갱신!' : '💣 폭탄 3번 받았어!';
+      ui.ovDesc.textContent = '이번 점수: '+Math.floor(score)+'점 · 최고 기록: '+getHighScore(session.username,'catch')+'점';
+      ui.btnStart.textContent = '다시 도전하기'; ui.overlay.style.display='flex';
+    }
+    function loop(now){
+      const dt=Math.min(48,now-last); last=now;
+      if (state==='playing') {
+        fallSpeed+=dt*0.0025;
+        if (keys.left) basket.x-=260*(dt/1000); if (keys.right) basket.x+=260*(dt/1000);
+        basket.x = Math.max(basket.w/2, Math.min(W-basket.w/2, basket.x));
+        spawnTimer-=dt; if (spawnTimer<=0) { spawn(); spawnTimer=Math.max(280,640-fallSpeed)+Math.random()*260; }
+        for (let i=items.length-1;i>=0;i--){
+          const it=items[i]; it.y+=fallSpeed*(dt/1000); it.spin+=dt*0.002;
+          const dx=Math.abs(it.x-basket.x), dy=Math.abs(it.y-basket.y);
+          if (dy<basket.h/2+it.r*0.6 && dx<basket.w/2+it.r*0.6) {
+            if (it.type==='star') { score+=1; beep(760,.08); }
+            else { lives-=1; beep(180,.2,'square'); if (lives<=0) { items.splice(i,1); gameOver(); break; } }
+            items.splice(i,1); continue;
+          }
+          if (it.y>H+20) items.splice(i,1);
+        }
+        ui.hudScore.textContent = Math.floor(score);
+      }
+      drawBg(); items.forEach(drawItem); drawBasket(); drawLives(); raf=requestAnimationFrame(loop);
+    }
+    function start(){ reset(); state='playing'; ui.overlay.style.display='none'; }
+    ui.btnStart.onclick = start;
+    ui.cv.addEventListener('pointermove', e => {
+      if (e.buttons===0 && e.pointerType!=='touch') return;
+      const rect=ui.cv.getBoundingClientRect(); const px=(e.clientX-rect.left)/rect.width*W;
+      basket.x = Math.max(basket.w/2, Math.min(W-basket.w/2, px));
+    });
+    ui.cv.addEventListener('pointerdown', e => {
+      e.preventDefault(); const rect=ui.cv.getBoundingClientRect(); const px=(e.clientX-rect.left)/rect.width*W;
+      basket.x = Math.max(basket.w/2, Math.min(W-basket.w/2, px));
+    });
+    const kd = e => { if (['ArrowLeft','KeyA'].includes(e.code)) { keys.left=true; e.preventDefault(); } if (['ArrowRight','KeyD'].includes(e.code)) { keys.right=true; e.preventDefault(); } };
+    const ku = e => { if (['ArrowLeft','KeyA'].includes(e.code)) keys.left=false; if (['ArrowRight','KeyD'].includes(e.code)) keys.right=false; };
+    addEventListener('keydown', kd); addEventListener('keyup', ku);
+    reset(); last=performance.now(); raf=requestAnimationFrame(loop);
+    stopGame = () => { cancelAnimationFrame(raf); removeEventListener('keydown', kd); removeEventListener('keyup', ku); };
+  }
+
+  function startLaneGame(){
+    if (stopGame) stopGame();
+    const ui = mountShell('🛤️ 3레인 피하기', '화면 왼쪽/오른쪽을 탭하거나 방향키로 차선을 바꿔서 블록을 피해봐.', 960, 420);
+    const cx = ui.cv.getContext('2d'); const W=480, H=210;
+    const LANES=[W*0.22, W*0.5, W*0.78]; const PLAYER_Y=H-30;
+    const toPx = (x,y) => [x*2,y*2];
+    ui.hudBest.textContent = getHighScore(session.username, 'lane');
+    let state='idle', lane, blocks, score, spawnTimer, fallSpeed, raf, last;
+    function reset(){ lane=1; blocks=[]; score=0; spawnTimer=0; fallSpeed=140+speedBonus*7; }
+    function moveLane(dir){ if (state!=='playing') return; lane=Math.max(0,Math.min(2,lane+dir)); beep(440,.06); }
+    function drawBg(){
+      const g=cx.createLinearGradient(0,0,0,ui.cv.height); g.addColorStop(0,'#0E1630'); g.addColorStop(1,'#152449');
+      cx.fillStyle=g; cx.fillRect(0,0,ui.cv.width,ui.cv.height);
+      cx.strokeStyle='rgba(160,185,255,.25)'; cx.lineWidth=2; cx.setLineDash([14,16]);
+      [(LANES[0]+LANES[1])/2, (LANES[1]+LANES[2])/2].forEach(lx => { const [px]=toPx(lx,0); cx.beginPath(); cx.moveTo(px,0); cx.lineTo(px,ui.cv.height); cx.stroke(); });
+      cx.setLineDash([]);
+    }
+    function drawPlayer(){
+      const [px,py]=toPx(LANES[lane], PLAYER_Y);
+      cx.save(); cx.translate(px,py); cx.scale(2,2);
+      cx.fillStyle='rgba(0,0,0,.3)'; cx.beginPath(); cx.ellipse(0,20,16,4,0,0,7); cx.fill();
+      cx.fillStyle='#F5F8FF'; cx.beginPath(); cx.roundRect(-13,-17,26,32,9); cx.fill();
+      cx.fillStyle='#16203C'; cx.beginPath(); cx.roundRect(-9,-11,18,11,5); cx.fill();
+      cx.fillStyle='#5FE3FF'; cx.beginPath(); cx.arc(-4,-5.5,2.3,0,7); cx.arc(4,-5.5,2.3,0,7); cx.fill();
+      cx.restore();
+    }
+    function spawn(){ const l=Math.floor(Math.random()*3); blocks.push({lane:l,y:-24,w:34,h:24}); }
+    function drawBlock(b){ const [px,py]=toPx(LANES[b.lane], b.y); cx.fillStyle='#FF5C72'; cx.beginPath(); cx.roundRect(px-b.w, py-b.h, b.w*2, b.h*2, 6); cx.fill(); }
+    function gameOver(){
+      state='over'; beep(160,.3,'square');
+      const isNew = setHighScore(session.username,'lane',Math.floor(score));
+      ui.hudBest.textContent = getHighScore(session.username,'lane');
+      ui.ovTitle.textContent = isNew ? '🏆 최고 기록 갱신!' : '💥 블록에 부딪혔어!';
+      ui.ovDesc.textContent = '이번 점수: '+Math.floor(score)+'점 · 최고 기록: '+getHighScore(session.username,'lane')+'점';
+      ui.btnStart.textContent = '다시 도전하기'; ui.overlay.style.display='flex';
+    }
+    function loop(now){
+      const dt=Math.min(48,now-last); last=now;
+      if (state==='playing') {
+        fallSpeed+=dt*0.006; score+=dt*0.02; ui.hudScore.textContent=Math.floor(score);
+        spawnTimer-=dt; if (spawnTimer<=0) { spawn(); spawnTimer=Math.max(420,900-fallSpeed)+Math.random()*260; }
+        for (let i=blocks.length-1;i>=0;i--){ const b=blocks[i]; b.y+=fallSpeed*(dt/1000); if (b.lane===lane && Math.abs(b.y-PLAYER_Y)<18) gameOver(); if (b.y>H+30) blocks.splice(i,1); }
+      }
+      drawBg(); blocks.forEach(drawBlock); drawPlayer(); raf=requestAnimationFrame(loop);
+    }
+    function start(){ reset(); state='playing'; ui.overlay.style.display='none'; }
+    ui.btnStart.onclick = start;
+    ui.cv.addEventListener('pointerdown', e => { e.preventDefault(); const rect=ui.cv.getBoundingClientRect(); const px=(e.clientX-rect.left)/rect.width; moveLane(px<0.5?-1:1); });
+    const kd = e => { if (['ArrowLeft','KeyA'].includes(e.code)) { moveLane(-1); e.preventDefault(); } if (['ArrowRight','KeyD'].includes(e.code)) { moveLane(1); e.preventDefault(); } };
+    addEventListener('keydown', kd);
+    reset(); last=performance.now(); raf=requestAnimationFrame(loop);
+    stopGame = () => { cancelAnimationFrame(raf); removeEventListener('keydown', kd); };
+  }
+
+  showMenu();
+  setTeardown(() => { if (stopGame) stopGame(); });
+}
+
+/* =========================================================
+   7. 부팅
+   ========================================================= */
+seed();
+route();
+</script>
+</body>
+</html>
