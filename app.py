@@ -154,7 +154,7 @@ def init_db():
     conn.close()
 
 
-init_db()  # gunicorn이 app을 import할 때도 항상 실행되도록 모듈 최상위에서 호출
+  # gunicorn이 app을 import할 때도 항상 실행되도록 모듈 최상위에서 호출
 
 
 # =========================================================
@@ -450,5 +450,6 @@ def health():
 
 
 if __name__ == "__main__":
+    init_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
