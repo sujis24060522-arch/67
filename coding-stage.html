@@ -230,7 +230,7 @@ const levelLabel = n => n === 9 ? '👑 VIP' : n + '단계';
 /* API_BASE가 빈 문자열이면 이 HTML을 서빙하는 서버와 같은 오리진의 /api/...를 호출해.
    프런트를 백엔드와 다른 도메인에 따로 올릴 거면 여기에 "https://내-render-주소.onrender.com" 처럼
    절대경로를 넣어줘 — 다만 그 경우 서버 쪽에서 CORS + 크로스사이트 쿠키 설정이 추가로 필요해. */
-const API_BASE = '';
+const API_BASE = "https://eagames-j4f2.onrender.com/?EgZjaHJvbWUyBggAEEUYOTIGCAEQRRg8Mg8IAhAjGCcY8AUYngYYogcyBggDECMYJzINCAQQLhiDARixAxiABDIGCAUQRRg8MgYIBhBFGEEyBggHEEUYPNIBCDEwODdqMGo3qAIIsAIB8QX17V2bO0p_evEF9e1dmztKf3oEEFBDgfhfdqeft99snfrelbspcllblbniaornspfspgjmdiINOIFFfhin&2026runinfoscore=${solvedCount}";
 
 async function apiFetch(path, { method = 'GET', body } = {}){
   const res = await fetch(API_BASE + path, {
